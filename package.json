@@ -1,0 +1,20 @@
+{
+  "name": "a04-lukeduck",
+  "version": "1.0.0",
+  "description": "a04 COMP 426",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/comp426-2022-spring/a04-lukeduck.git"
+  },
+  "author": "Luke Duckworth",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/comp426-2022-spring/a04-lukeduck/issues"
+  },
+  "homepage": "https://github.com/comp426-2022-spring/a04-lukeduck#readme"
+}
