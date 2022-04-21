@@ -3,8 +3,9 @@ const app = express()
 const fs = require('fs')
 const morgan = require('morgan')
 const db = require("./database.js")
+const minimist = require('minimist')
 
-const args = require('minimist')(process.argv.slice(2))
+const args = minimist(process.argv.slice(2))
 args["help", "port", "debug", "log"]
 
 const help = (`
