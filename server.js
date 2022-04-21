@@ -121,8 +121,9 @@ function flipACoin(call) {
       }
 }
 
+// endpoints
 if (args.debug) {
-    app.get("/app/log/access/", (req, res) => {
+    app.get("/app/log/access", (req, res) => {
         try {
             const stmt = db.prepare('SELECT * FROM accesslog').all()
             res.status(200).json(stmt)
@@ -130,11 +131,11 @@ if (args.debug) {
             console.error(e)
         }
     })
-    app.get("/app/error/", (req, res) => {
+    app.get("/app/error", (req, res) => {
         throw new Error('Error Test Successful')
     })
 }
-// endpoints
+
 app.get('/app/', (req, res) => {
     res.status(200).end('OK')
     res.type("text/plain")
