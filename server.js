@@ -61,3 +61,107 @@ app.use((req, res, next) => {
     const info = stmt.run(logData.remoteaddr, logData.remoteuser, logData.time, logData.method, logData.url, logData.protocol, logData.httpversion, logData.status, logData.referer, logData.useragent);
     next();
 })
+
+// coin fns
+function coinFlip() {
+    return Math.random() > .5 ? 'heads' : 'tails';
+}
+
+function coinFlips(flips) {
+    let array = [];
+    for (let i=0; i<flips; i++) {
+      array[i] = coinFlip();
+    }
+    return array;
+}
+
+function countFlips(array) {
+    let h = 0;
+    let t = 0;
+  
+    for (let i = 0; i < array.length; i++) {
+      if (array[i] == "heads") {
+        h++;
+      } else if (array[i] == "tails") {
+        t++;
+      }
+    }
+  
+    if (h !=0 && t != 0) {
+      return {tails: t, heads: h};
+    } 
+  
+    if (h == 0 && t == 0) {
+      return {};
+    }
+    
+    if (h == 0) {
+      return {tails: t};
+    }
+    
+    if (t == 0) {
+      return {heads: h};
+    }
+}
+
+function flipACoin(call) {
+    let flip = coinFlip();
+    if (flip == call) {
+      return {
+        call: call,
+        flip: flip,
+        result: "win"
+      }
+      } else {
+        return {
+          call: call,
+          flip: flip,
+          result: "lose"
+        }
+      }
+}
+
+if (args.debug) {
+    app.get("/app/log/access/", (req, res) => {
+        try {
+            const stmt = db.prepare('SELECT * FROM accesslog').all()
+            res.status(200).json(stmt)
+        } catch(e) {
+            console.error(e)
+        }
+    })
+    app.get("/app/error/", (req, res) => {
+        throw new Error('Error Test Successful')
+    })
+}
+// endpoints
+app.get('/app/', (req, res) => {
+    res.status(200).end('OK')
+    res.type("text/plain")
+})
+
+app.get('/app/flip/', (req, res) => {
+    var flip = coinFlip()
+    res.status(200).json({'flip' : flip})
+})
+
+app.get('/app/flips/:number/', (req, res) => {
+    var flips = coinFlips(req.params.number)
+    res.status(200).json({'raw': flips, 'summary': countFlips(flips)})
+})
+
+app.get('/app/flip/call/tails/', (req, res) => {
+    var flip = flipACoin('tails')
+    res.status(200).json(flip)
+})
+
+app.get('/app/flip/call/heads/', (req, res) => {
+    var flip = flipACoin('heads')
+    res.status(200).json(flip)
+})
+
+//default
+app.use(function(req, res) {
+    res.status(404).send("Endpoint does not exist")
+    res.type("text/plain")
+})
