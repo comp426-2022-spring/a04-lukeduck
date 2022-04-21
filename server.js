@@ -2,12 +2,10 @@ const express = require('express')
 const app = express()
 const fs = require('fs')
 const morgan = require('morgan')
+const db = require("./database.js")
 
 const args = require('minimist')(process.argv.slice(2))
 args["help", "port", "debug", "log"]
-
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
 
 const help = (`
 server.js [options]
@@ -30,3 +28,36 @@ if (args.help || args.h) {
     console.log(help)
     process.exit(0)
 }
+
+// port default to 5555
+const port = args.port || process.env.port || 5555
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+const server = app.listen(port, () => {
+    console.log('App is running on port %PORT%'.replace('%PORT%', port))
+})
+
+if (args.log == true) {
+    const WRITESTREAM = fs.createWriteStream('access.log', { flags: 'a' });
+    app.use(morgan('combined', { stream: WRITESTREAM }));
+}
+
+app.use((req, res, next) => {
+    let logData = {
+        remoteaddr: req.ip,
+        remoteuser: req.user,
+        time: Date.now(),
+        method: req.method,
+        url: req.url,
+        protocol: req.protocol,
+        httpversion: req.httpVersion,
+        status: res.statusCode,
+        referer: req.headers['referer'],
+        useragent: req.headers['user-agent']
+    }
+    const stmt = db.prepare('INSERT INTO accesslog (remoteaddr, remoteuser, time, method, url, protocol, httpversion, status, referer, useragent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(logData.remoteaddr, logData.remoteuser, logData.time, logData.method, logData.url, logData.protocol, logData.httpversion, logData.status, logData.referer, logData.useragent);
+    next();
+})
